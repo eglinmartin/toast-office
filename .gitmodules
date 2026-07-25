@@ -1,0 +1,3 @@
+[submodule "hatchling"]
+	path = hatchling
+	url = https://github.com/eglinmartin/hatchling-engine
