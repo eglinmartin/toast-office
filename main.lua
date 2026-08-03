@@ -15,19 +15,21 @@ end
 
 
 function love.load()
-    GAME_SIZE = {1920, 1080}
+    GAME_SIZE = {240, 135}
     WINDOW_SIZE = {960, 540}
+    BIN_PATH = '/game/bin'
 
     rs.conf({game_width = GAME_SIZE[1], game_height = GAME_SIZE[2], pixel_perfect = true})
     rs.setMode(WINDOW_SIZE[1], WINDOW_SIZE[2], {fullscreen = false})
+    love.graphics.setDefaultFilter("nearest", "nearest")
 
-    ENGINE = Engine()
+    ENGINE = Engine(BIN_PATH, rs, flux)
     GAME = Game(ENGINE)
 end
 
 
 function love.update(dt)
-    ENGINE:update(dt)
+    ENGINE:update(dt, rs)
     GAME:update(dt)
     flux.update(dt)
 end
@@ -35,6 +37,7 @@ end
 
 function love.draw()
     ENGINE.render_manager:draw()
+    love.graphics.setColor(1, 1, 1)
 end
 
 
