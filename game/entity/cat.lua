@@ -37,7 +37,7 @@ end
 
 function Cat:on_drag_start()
     Entity.on_drag_start(self)
-    self.engine.flux.to(self, 0.25, {scale=1.2}):ease("expoout")
+    self.engine.flux.to(self, 0.25, {scale_x=1.2, scale_y=1.2}):ease("expoout")
     self.sprite_tag = "idle"
     self:create_sprite()
 end
@@ -46,7 +46,7 @@ end
 function Cat:on_drag_end()
     Entity.on_drag_end(self)
     self.sprite_tag = "sleep"
-    self.engine.flux.to(self, 0.25, {scale=1, y=self.y+1}):ease("expoout")
+    self.engine.flux.to(self, 0.25, {scale_x=1, scale_y=1, y=self.y+1}):ease("expoout")
     self:create_sprite()
 end
 
