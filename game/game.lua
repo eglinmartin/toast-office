@@ -20,6 +20,7 @@ end
 
 
 function Game:update(dt)
+    print(love.timer.getFPS())
 end
 
 
