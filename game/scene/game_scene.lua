@@ -21,15 +21,13 @@ local DOOR_TOLERANCE = 14
 local DOOR_X = 146.5
 
 local FRIDGE_COOLDOWN = 0.5
+local FRIDGE_NAV_COOLDOWN = 0.15
 local FRIDGE_TOLERANCE = 9
 local FRIDGE_X = 198
-
 local OVEN_TOLERANCE = 9
-local OVEN_X = 179
-
+local OVEN_X = 180
 local BOARD_TOLERANCE = 9
 local BOARD_X = 162
-
 local TOASTER_TOLERANCE = 10
 local TOASTER_X = 143
 
@@ -71,9 +69,10 @@ function GameScene:enter()
     self.engine:add_sprite_hud("in_tray", "in_tray", "in_tray", 31, 79, 1, 0, 202)
     self.engine:add_sprite_hud("header_in_tray", "header_orders", "header_orders", 31, 12.5, 1, 0, 202)
     
-    self.engine:add_sprite_hud("menu_right", "menu_right", "menu_right", 266, 68, 1, 0, 201)
-    self.engine:add_sprite_hud("hud_fridge", "hud_fridge", "hud_fridge", 290, 79, 1, 0, 202)
-    self.engine:add_sprite_hud("header_fridge", "header_fridge", "header_fridge", 290, 12.5, 1, 0, 202)
+    self.fridge_x = 290
+    self.engine:add_sprite_hud("menu_right", "menu_right", "menu_right", self.fridge_x - 4, 68, 1, 0, 201)
+    self.engine:add_sprite_hud("hud_fridge", "hud_fridge", "hud_fridge", self.fridge_x, 79, 1, 0, 202)
+    self.engine:add_sprite_hud("header_fridge", "header_fridge", "header_fridge", self.fridge_x, 12.5, 1, 0, 202)
 
     self.engine:add_sprite("debug_point", "debug_point", "debug_point", 0, 0, 1, 0, 255)
 
@@ -88,6 +87,10 @@ function GameScene:enter()
     self.board = Board(self, 164.5, 101.5)
     self.oven = Oven(self, 181.5, 104.5)
     self.fridge = Fridge(self, 197.5, 99.5)
+    for item, values in pairs(self.fridge.inventory) do
+        if values.unlocked then
+            self.engine:add_sprite_hud(values.name, values.name, "1", self.fridge_x - values.x_offset, values.y, 1, 0, 210)        end
+    end
 
     self.door_hover = false
 end
@@ -134,10 +137,17 @@ end
 
 
 function GameScene:open_fridge()
+    self.engine.flux.to(self, 0.5, {fridge_x=209}):ease("expoout")
     self.engine.flux.to(CAMERA, 0.5, {x=184}):ease("expoout")
-    self.engine.flux.to(self.engine.render_manager.draw_objects_hud['menu_right'], 0.5, {x=205}):ease("expoout")
-    self.engine.flux.to(self.engine.render_manager.draw_objects_hud['header_fridge'], 0.5, {x=209}):ease("expoout")
-    self.engine.flux.to(self.engine.render_manager.draw_objects_hud['hud_fridge'], 0.5, {x=209}):ease("expoout")
+
+    for item in pairs(self.fridge.inventory) do
+        local hud_key = "hud_fridge_" .. item
+        local draw_obj = self.engine.render_manager.draw_objects_hud[hud_key]
+        if draw_obj then
+            self.engine.flux.to(draw_obj, 0.5, {x = 209}):ease("expoout")
+        end
+    end
+
     self.fridge.open = true
     self.fridge.sprite_tag = "open_top"
     self.fridge:create_sprite()
@@ -146,9 +156,8 @@ end
 
 function GameScene:close_fridge()
     self.engine.flux.to(CAMERA, 0.5, {x=150}):ease("expoout")
-    self.engine.flux.to(self.engine.render_manager.draw_objects_hud['menu_right'], 0.5, {x=266}):ease("expoout")
-    self.engine.flux.to(self.engine.render_manager.draw_objects_hud['header_fridge'], 0.5, {x=290}):ease("expoout")
-    self.engine.flux.to(self.engine.render_manager.draw_objects_hud['hud_fridge'], 0.5, {x=290}):ease("expoout")
+    self.engine.flux.to(self, 0.5, {fridge_x=290}):ease("expoout")
+
     self.fridge.open = false
     self.fridge.sprite_tag = "shut"
     self.fridge:create_sprite()
@@ -157,21 +166,46 @@ end
 
 function GameScene:setup_events()
     self.engine.event_manager:on(self.engine.event_manager.events["MOVE_LEFT"], self, function()
-        if not self.fridge.open then
+        if self.fridge.open then
+            if not self.fridge_nav_cooldown then
+                self.fridge:select_nearest(-1, 0)
+                self.fridge_nav_cooldown = FRIDGE_NAV_COOLDOWN
+            end
+        else
             self.player:move_left()
         end
     end)
 
     self.engine.event_manager:on(self.engine.event_manager.events["MOVE_RIGHT"], self, function()
-        if not self.fridge.open then
+        if self.fridge.open then
+            if not self.fridge_nav_cooldown then
+                self.fridge:select_nearest(1, 0)
+                self.fridge_nav_cooldown = FRIDGE_NAV_COOLDOWN
+            end
+        else
             self.player:move_right()
         end
     end)
-    
+
     self.engine.event_manager:on(self.engine.event_manager.events["MOVE_UP"], self, function()
-        if not self.door_cooldown then
+        if self.fridge.open then
+            if not self.fridge_nav_cooldown then
+                self.fridge:select_nearest(0, -1)
+                self.fridge_nav_cooldown = FRIDGE_NAV_COOLDOWN
+            end
+        elseif not self.door_cooldown then
             self:toggle_house()
             self.door_cooldown = DOOR_COOLDOWN
+        end
+    end)
+
+    self.engine.event_manager:on(self.engine.event_manager.events["MOVE_DOWN"], self, function()
+        if self.fridge.open then
+            if not self.fridge_nav_cooldown then
+                
+                self.fridge:select_nearest(0, 1)
+                self.fridge_nav_cooldown = FRIDGE_NAV_COOLDOWN
+            end
         end
     end)
 
@@ -185,12 +219,11 @@ end
 
 
 function GameScene:setup_keybinds()
+    self.engine:create_keybind(self, "w", "MOVE_UP")
     self.engine:create_keybind(self, "a", "MOVE_LEFT")
+    self.engine:create_keybind(self, "s", "MOVE_DOWN")
     self.engine:create_keybind(self, "d", "MOVE_RIGHT")
     self.engine:create_keybind(self, "e", "INTERACT")
-    self.engine:create_keybind(self, "w", "MOVE_UP")
-    self.engine:create_keybind(self, "left", "MOVE_LEFT")
-    self.engine:create_keybind(self, "right", "MOVE_RIGHT")
 end
 
 
@@ -211,12 +244,36 @@ function GameScene:update(dt, mx, my, md, mp)
         self.player.x = x_max
     end
 
+    -- Position fridge HUD elements
+    local fridge_hud_elements = {
+        menu_right = {name = "menu_right", x_offset = -4},
+        header_fridge = {name = "header_fridge", x_offset = 0},
+        hud_fridge = {name = "hud_fridge", x_offset = 0},
+    }
+    for item, values in pairs(self.fridge.inventory) do
+        fridge_hud_elements[item] = values
+    end
+    for item, values in pairs(fridge_hud_elements) do
+        local hud_element = self.engine.render_manager.draw_objects_hud[values.name]
+        if hud_element then
+            hud_element.x = self.fridge_x + values.x_offset
+        end
+    end
+    if self.fridge.selected_item then
+        local values = self.fridge.inventory[self.fridge.selected_item]
+        if values then
+            local item_name = values.name
+            self.engine:add_sprite_hud("fridge_selection_outline", item_name, "1_outline", self.fridge_x + values.x_offset, values.y, 1, 0, 255)
+        end
+    end
+
     -- Update fridge parameters
     self.fridge.hovered = self:hover_entity(self.player.interact_x, FRIDGE_X, FRIDGE_TOLERANCE)
     self.fridge_cooldown = self:update_cooldown(self.fridge_cooldown, dt)
-    if self.fridge.hovered and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["fridge_outline"] then
+    self.fridge_nav_cooldown = self:update_cooldown(self.fridge_nav_cooldown, dt)
+    if self.fridge.hovered and not self.fridge.open and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["fridge_outline"] then
         self.engine:add_sprite("fridge_outline", "fridge", "outline", 197.5, 99.5, 1, 0, 21)
-    elseif not self.fridge.hovered then
+    elseif not self.fridge.hovered or self.fridge.open then
         self.engine.render_manager.draw_objects_foreground["fridge_outline"] = nil
     end
 

@@ -1,0 +1,126 @@
+{ "frames": {
+   "ingredients 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 1.aseprite": {
+    "frame": { "x": 24, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 2.aseprite": {
+    "frame": { "x": 48, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 3.aseprite": {
+    "frame": { "x": 72, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 4.aseprite": {
+    "frame": { "x": 96, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 5.aseprite": {
+    "frame": { "x": 120, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 6.aseprite": {
+    "frame": { "x": 144, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 7.aseprite": {
+    "frame": { "x": 168, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 8.aseprite": {
+    "frame": { "x": 192, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 9.aseprite": {
+    "frame": { "x": 216, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 10.aseprite": {
+    "frame": { "x": 240, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   },
+   "ingredients 11.aseprite": {
+    "frame": { "x": 264, "y": 0, "w": 24, "h": 15 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 24, "h": 15 },
+    "sourceSize": { "w": 24, "h": 15 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.7-x64",
+  "image": "ingredients.png",
+  "format": "RGBA8888",
+  "size": { "w": 288, "h": 15 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "1", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
+   { "name": "2", "from": 1, "to": 1, "direction": "forward", "color": "#000000ff" },
+   { "name": "3", "from": 2, "to": 2, "direction": "forward", "color": "#000000ff" },
+   { "name": "4", "from": 3, "to": 3, "direction": "forward", "color": "#000000ff" },
+   { "name": "5", "from": 4, "to": 4, "direction": "forward", "color": "#000000ff" },
+   { "name": "6", "from": 5, "to": 5, "direction": "forward", "color": "#000000ff" },
+   { "name": "1_outline", "from": 6, "to": 6, "direction": "forward", "color": "#000000ff" },
+   { "name": "2_outline", "from": 7, "to": 7, "direction": "forward", "color": "#000000ff" },
+   { "name": "3_outline", "from": 8, "to": 8, "direction": "forward", "color": "#000000ff" },
+   { "name": "4_outline", "from": 9, "to": 9, "direction": "forward", "color": "#000000ff" },
+   { "name": "5_outline", "from": 10, "to": 10, "direction": "forward", "color": "#000000ff" },
+   { "name": "6_outline", "from": 11, "to": 11, "direction": "forward", "color": "#000000ff" }
+  ],
+  "layers": [
+   { "name": "butter", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}

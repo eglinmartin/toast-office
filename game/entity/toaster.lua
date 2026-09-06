@@ -19,7 +19,9 @@ function Toaster:init(scene, x, y)
     })
     scene.engine:register_entity("toaster", self)
     self.hovered = false
-    self.open = false
+
+    self.slots = 1
+    self.slots_max = 4
 end
 
 
