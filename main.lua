@@ -4,6 +4,7 @@ love.filesystem.setRequirePath(
 
 local flux = require("hatchling.engine.lib.flux")
 local rs = require("hatchling.engine.lib.resolution_solution")
+local Camera = require("hatchling.engine.lib.camera")
 local Engine = require("hatchling.engine.hatchling")
 local Game = require("game.game")
 
@@ -22,8 +23,10 @@ function love.load()
     rs.conf({game_width = GAME_SIZE[1], game_height = GAME_SIZE[2], pixel_perfect = true})
     rs.setMode(WINDOW_SIZE[1], WINDOW_SIZE[2], {fullscreen = false})
     love.graphics.setDefaultFilter("nearest", "nearest")
+    local camera = Camera(120, 67.5)
+    love.window.setTitle("Toast Office")
 
-    ENGINE = Engine(BIN_PATH, rs, flux)
+    ENGINE = Engine(BIN_PATH, rs, flux, camera)
     GAME = Game(ENGINE)
 end
 

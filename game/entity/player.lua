@@ -3,6 +3,8 @@ local Class = require("hatchling.engine.lib.class")
 local Entity = require("hatchling.engine.class.entity")
 local Player = Class{__includes = Entity}
 
+local INTERACT_OFFSET = 5.5
+
 
 function Player:init(scene, x, y)
     Entity.init(self, scene, "player", {x=x, y=y, w=16, h=16, s=1, r=0, sprite_sheet="player", sprite_tag="player", animation_speed=0.1, depth=128, moveable=true})
@@ -13,6 +15,8 @@ function Player:init(scene, x, y)
     self:set_sine_wave('y', {amplitude = 1, frequency = 5})
 
     self.facing = 1
+    self.interact_x = self.x
+
     self.walking = false
     self.walking_momentum = 0
 
@@ -86,6 +90,12 @@ function Player:update(dt, mx, my, mouse_down, mouse_pressed)
     self.held_right = false
     self.scene.engine.flux.to(self, 0.25, {y=self.base_y, rotation=0})
 
+    if self.facing == 1 then
+        self.interact_x = self.x + INTERACT_OFFSET
+    else
+        self.interact_x = self.x - INTERACT_OFFSET
+    end
+
     if not self.carrying then
         if self.facing == 1 then
             self.hand_front.x = self.x - 2
@@ -112,11 +122,6 @@ function Player:update(dt, mx, my, mouse_down, mouse_pressed)
 
         self.hand_front.y = self.y - 0.5
         self.hand_back.y = self.y - 0.5
-    end
-
-    local x_limit = 200
-    if self.x > x_limit then
-        self.x = x_limit
     end
 end
 
