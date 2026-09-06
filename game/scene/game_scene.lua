@@ -101,12 +101,10 @@ end
 
 
 function GameScene:toggle_fridge()
-    if self.fridge.hovered then
-        if not self.fridge.open then
+    if self.fridge.hovered and not self.fridge.open then
             self:open_fridge()
-        else
-            self:close_fridge()
-        end
+    elseif self.fridge.open then
+        self:close_fridge()
     end
 end
 
