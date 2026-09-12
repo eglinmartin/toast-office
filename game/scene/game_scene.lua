@@ -18,22 +18,21 @@ local CAMERA = {x = 120, y = 67.5, zoom = 1}
 
 local DOOR_COOLDOWN = 0.5
 local DOOR_TOLERANCE = 14
-local DOOR_X = 146.5
+local DOOR_X = 151.5
 
 local FRIDGE_COOLDOWN = 0.5
 local FRIDGE_NAV_COOLDOWN = 0.15
-local FRIDGE_TOLERANCE = 9
-local FRIDGE_X = 198
-local OVEN_TOLERANCE = 9
-local OVEN_X = 180
+local FRIDGE_TOLERANCE = 8
+local FRIDGE_X = 198.5
+local OVEN_TOLERANCE = 8
+local OVEN_X = 182.5
 local BOARD_TOLERANCE = 9
-local BOARD_X = 162
-local TOASTER_TOLERANCE = 10
-local TOASTER_X = 143
+local BOARD_X = 133
+local TOASTER_TOLERANCE = 8
+local TOASTER_X = 166.5
 
 local X_MIN, X_MAX = 71, 230
-local X_MIN_INDOOR, X_MAX_INDOOR = 141, 200
-
+local X_MIN_INDOOR, X_MAX_INDOOR = 125, 200
 
 function GameScene:init(game, engine)
     Scene.init(self, game, engine)
@@ -50,15 +49,13 @@ function GameScene:enter()
         {"hedge",       94.5,   103,    1,  0,  4},
         {"tree_left",   76.5,   71.5,   1,  0,  5},
         {"fence",       74.5,   106,    1,  0,  6},
-        {"toast_box",   98.5,   101.5,  1,  0,  10},
-        {"phone_box",   118,    97,     1,  0,  10},
+        {"toast_box",   99.5,   101.5,  1,  0,  10},
         {"ground",      120,    135.5,  1,  0,  16},
-        {"house",       177.5,  80.5,   1,  0,  18},
-        {"house_front", 170.5,  94.5,   1,  0,  40},
-        {"kitchen",     170,    99,     1,  0,  19},
+        {"house",       170,  80,   1,  0,  18},
+        {"house_front", 162.5,  94.5,   1,  0,  40},
+        {"kitchen",     163,    99,     1,  0,  19},
         {"tree_right",  229,    82.5,   1,  0,  21},
         {"shrub_right", 227.5,  101,    1,  0,  22},
-    self.engine:add_sprite("house_front", "house_front", "house_front", 170.5, 94.5, 1, 0, 40)
     }
     for _, p in ipairs(scene_sprites) do
         self.engine:add_sprite(p[1], p[1], p[1], p[2], p[3], p[4], p[5], p[6])
@@ -77,16 +74,16 @@ function GameScene:enter()
     self.engine:add_sprite("debug_point", "debug_point", "debug_point", 0, 0, 1, 0, 255)
 
     -- Initialize cat
-    self.cat = Cat(self, 99, 93)
+    self.cat = Cat(self, 100, 93)
 
     -- Initialize player
     self.player = Player(self, 80, 103)
     self.player_indoors = false
     
-    self.toaster = Toaster(self, 147.5, 99.5)
-    self.board = Board(self, 164.5, 101.5)
-    self.oven = Oven(self, 181.5, 104.5)
-    self.fridge = Fridge(self, 197.5, 99.5)
+    self.toaster = Toaster(self, TOASTER_X, 99.5)
+    self.board = Board(self, BOARD_X, 101.5)
+    self.oven = Oven(self, OVEN_X, 104.5)
+    self.fridge = Fridge(self, FRIDGE_X, 99.5)
     for item, values in pairs(self.fridge.inventory) do
         if values.unlocked then
             self.engine:add_sprite_hud(values.name, values.name, "1", self.fridge_x - values.x_offset, values.y, 1, 0, 210)        end
@@ -120,15 +117,25 @@ function GameScene:toggle_house()
 end
 
 
+function GameScene:enter_garden()
+    self.engine.flux.to(CAMERA, 0.5, {x=220, y=67.5, zoom=1}):ease("expoout")
+end
+
+
+function GameScene:leave_garden()
+    self.engine.flux.to(CAMERA, 0.5, {x=120, y=67.5, zoom=1}):ease("expoout")
+end
+
+
 function GameScene:enter_house()
     self.engine.render_manager.draw_objects_foreground["house_front"] = nil
     self.player_indoors = true
-    self.engine.flux.to(CAMERA, 0.5, {x=150, y=72.5, zoom=1.3}):ease("expoout")
+    self.engine.flux.to(CAMERA, 0.5, {x=142, y=74.5, zoom=1.3}):ease("expoout")
 end
 
 
 function GameScene:leave_house()
-    self.engine:add_sprite("house_front", "house_front", "house_front", 170.5, 94.5, 1, 0, 40)
+    self.engine:add_sprite("house_front", "house_front", "house_front", 162.5, 94.5, 1, 0, 40)
     self.player_indoors = false
     self.engine.flux.to(CAMERA, 0.5, {x=120, y=67.5, zoom=1}):ease("expoout")
 end
@@ -270,7 +277,7 @@ function GameScene:update(dt, mx, my, md, mp)
     self.fridge_cooldown = self:update_cooldown(self.fridge_cooldown, dt)
     self.fridge_nav_cooldown = self:update_cooldown(self.fridge_nav_cooldown, dt)
     if self.fridge.hovered and not self.fridge.open and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["fridge_outline"] then
-        self.engine:add_sprite("fridge_outline", "fridge", "outline", 197.5, 99.5, 1, 0, 21)
+        self.engine:add_sprite("fridge_outline", "fridge", "outline", FRIDGE_X, 99.5, 1, 0, 21)
     elseif not self.fridge.hovered or self.fridge.open then
         self.engine.render_manager.draw_objects_foreground["fridge_outline"] = nil
     end
@@ -279,7 +286,7 @@ function GameScene:update(dt, mx, my, md, mp)
     self.door_hovered = self:hover_entity(self.player.interact_x, DOOR_X, DOOR_TOLERANCE)
     self.door_cooldown = self:update_cooldown(self.door_cooldown, dt)
     if self.door_hovered and not self.player_indoors and not self.engine.render_manager.draw_objects_foreground["door_outline"] then
-        self.engine:add_sprite("door_outline", "door_outline", "door_outline", 146.5, 99, 1, 0, 41)
+        self.engine:add_sprite("door_outline", "door_outline", "door_outline", DOOR_X, 99, 1, 0, 41)
     elseif not self.door_hovered or self.player_indoors then
         self.engine.render_manager.draw_objects_foreground["door_outline"] = nil
     end
@@ -287,7 +294,7 @@ function GameScene:update(dt, mx, my, md, mp)
     -- Update oven parameters
     self.oven.hovered = self:hover_entity(self.player.interact_x, OVEN_X, OVEN_TOLERANCE)
     if self.oven.hovered and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["oven_outline"] then
-        self.engine:add_sprite("oven_outline", "oven", "outline", 181.5, 104.5, 1, 0, 21)
+        self.engine:add_sprite("oven_outline", "oven", "outline", OVEN_X, 104.5, 1, 0, 21)
     elseif not self.oven.hovered then
         self.engine.render_manager.draw_objects_foreground["oven_outline"] = nil
     end
@@ -295,7 +302,7 @@ function GameScene:update(dt, mx, my, md, mp)
     -- Update board parameters
     self.board.hovered = self:hover_entity(self.player.interact_x, BOARD_X, BOARD_TOLERANCE)
     if self.board.hovered and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["board_outline"] then
-        self.engine:add_sprite("board_outline", "board", "outline", 164.5, 101.5, 1, 0, 21)
+        self.engine:add_sprite("board_outline", "board", "outline", BOARD_X, 101.5, 1, 0, 21)
     elseif not self.board.hovered then
         self.engine.render_manager.draw_objects_foreground["board_outline"] = nil
     end
@@ -303,7 +310,7 @@ function GameScene:update(dt, mx, my, md, mp)
     -- Update toaster parameters
     self.toaster.hovered = self:hover_entity(self.player.interact_x, TOASTER_X, TOASTER_TOLERANCE)
     if self.toaster.hovered and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["toaster_outline"] then
-        self.engine:add_sprite("toaster_outline", "toaster", "outline", 147.5, 99.5, 1, 0, 21)
+        self.engine:add_sprite("toaster_outline", "toaster", "outline", TOASTER_X, 99.5, 1, 0, 21)
     elseif not self.toaster.hovered then
         self.engine.render_manager.draw_objects_foreground["toaster_outline"] = nil
     end

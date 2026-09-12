@@ -17,7 +17,7 @@ end
 
 function love.load()
     GAME_SIZE = {240, 135}
-    WINDOW_SIZE = {960, 540}
+    WINDOW_SIZE = {720, 405}
     BIN_PATH = '/game/bin'
 
     rs.conf({game_width = GAME_SIZE[1], game_height = GAME_SIZE[2], pixel_perfect = true})
