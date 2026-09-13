@@ -10,12 +10,13 @@ function Game:init(hatchling)
     self.hatchling.render_manager.shadow_offset = {1, 1}
     self.hatchling.render_manager.shadow_colour = {9/255, 10/255, 20/255}
 
-    self.hatchling:add_scene("GAME", GameScene(self, self.hatchling))
+    self.hatchling:add_scene("GAME", GameScene(self, self.hatchling, self.font))
     self.hatchling:switch_scene("GAME")
 end
 
 
 function Game:load_fonts()
+    self.font = love.graphics.newFont("game/font/SuperBakery.ttf", 2)
 end
 
 

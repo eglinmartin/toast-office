@@ -49,9 +49,10 @@ function love.resize(w, h)
 end
 
 
-function love.keypressed(key)
-    ENGINE.input_manager:keypressed(key)
+function love.keypressed(key, scancode, isrepeat)
+    ENGINE.input_manager:keypressed(key, isrepeat)
 end
+
 
 
 function love.mousepressed(x, y, button)
