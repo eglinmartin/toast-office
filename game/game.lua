@@ -16,7 +16,6 @@ end
 
 
 function Game:load_fonts()
-    self.font = love.graphics.newFont("game/font/SuperBakery.ttf", 2)
 end
 
 

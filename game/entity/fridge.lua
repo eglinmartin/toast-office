@@ -5,9 +5,9 @@ local Fridge = Class{__includes = Entity}
 
 
 Fridge.Item = {
-    JAM_STRAWBERRY = {name="strawberry_jam", unlocked=true, x_offset=-14, y=42.5, amount=100},
-    JAM_MARMALADE = {name="marmalade", unlocked=false, x_offset=-3, y=42.5, amount=100},
-    BUTTER = {name="butter", unlocked=true, x_offset=14, y=62.5, amount=100},
+    JAM_STRAWBERRY = {name="strawberry_jam", alias="Strawberry Jam", unlocked=true, x_offset=-14, y=42.5, amount=100, text_length="huge"},
+    MARMALADE = {name="marmalade", alias="Marmalade", unlocked=true, x_offset=-3, y=42.5, amount=100, text_length="medium"},
+    BUTTER = {name="butter", alias="Butter", unlocked=true, x_offset=14, y=62.5, amount=100, text_length="small"},
 }
 
 
@@ -32,14 +32,16 @@ function Fridge:init(scene, x, y)
     for key, values in pairs(Fridge.Item) do
         self.inventory[key] = {
             name = values.name,
+            alias = values.alias,
             unlocked = values.unlocked,
             x_offset = values.x_offset,
             y = values.y,
             amount = values.amount,
+            text_length = values.text_length,
         }
     end
 
-    self.selected_item = "JAM_STRAWBERRY"
+    self.selected_item = "BUTTER"
 end
 
 

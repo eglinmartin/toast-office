@@ -28,6 +28,7 @@ local BOARD_TOLERANCE = 14
 local BOARD_X = 133
 local TOASTER_TOLERANCE = 8
 local TOASTER_X = 166.5
+local TOASTER_Y = 96.5
 
 local X_MIN, X_MAX = 71, 230
 local X_MIN_INDOOR, X_MAX_INDOOR = 125, 200
@@ -82,16 +83,16 @@ function GameScene:enter()
     self.player = Player(self, 80, 103)
     self.player_indoors = false
     
-    self.engine:add_text_hud("text_bread_shadow", tostring(self.player.bread), "SuperCartoon", 8, Colours.BROWN4, 85.5, 18.75, 1, 0, 300, "left")
-    self.engine:add_text_hud("text_bread", tostring(self.player.bread), "SuperCartoon", 8, Colours.WHITE, 84.5, 17.75, 1, 0, 301, "left")
+    -- self.engine:add_text_hud("text_bread_shadow", tostring(self.player.bread), "Curtel", 16, Colours.BROWN4, 86.25, 13.25, 1, 0, 300, "left")
+    self.engine:add_text_hud("text_bread", tostring(self.player.bread), "Curtel", 16, Colours.WHITE, 85.25, 12.25, 1, 0, 301, "left")
 
-    self.engine:add_text_hud("text_orders_shadow", "ORDERS", "SuperCartoon", 10, Colours.BROWN4, 31.5, 16, 1, 0, 300, "centre")
-    self.engine:add_text_hud("text_orders", "ORDERS", "SuperCartoon", 10, Colours.WHITE, 30.5, 15, 1, 0, 301, "centre")
+    self.engine:add_text_hud("text_orders_shadow", "ORDERS", "Curtel", 24, Colours.BROWN4, 32.75, 7.25, 1, 0, 300, "centre")
+    self.engine:add_text_hud("text_orders", "ORDERS", "Curtel", 24, Colours.WHITE, 31.75, 6.25, 1, 0, 301, "centre")
 
-    self.engine:add_text_hud("text_fridge_shadow", "FRIDGE", "SuperCartoon", 10, Colours.BROWN4, 270.5, 16, 1, 0, 300, "centre")
-    self.engine:add_text_hud("text_fridge", "FRIDGE", "SuperCartoon", 10, Colours.WHITE, 269.5, 15, 1, 0, 301, "centre")
+    self.engine:add_text_hud("text_fridge_shadow", "FRIDGE", "Curtel", 24, Colours.BROWN4, 210.75, 7.25, 1, 0, 300, "centre")
+    self.engine:add_text_hud("text_fridge", "FRIDGE", "Curtel", 24, Colours.WHITE, 209.75, 6.25, 1, 0, 301, "centre")
 
-    self.toaster = Toaster(self, TOASTER_X, 99.5)
+    self.toaster = Toaster(self, TOASTER_X, 99.5, self.engine.flux)
     self.board = Board(self, BOARD_X, 101.5)
     self.oven = Oven(self, OVEN_X, 104.5)
     self.fridge = Fridge(self, FRIDGE_X, 99.5)
@@ -186,13 +187,33 @@ function GameScene:use_board()
         self.player.bread = self.board.slices
         self.board:remove_slices()
 
-        self.engine:set_text_hud("text_bread_shadow", tostring(self.player.bread))
-        self.engine.render_manager.text_objects_hud["text_bread_shadow"].x = 86.5
-        self.engine.flux.to(self.engine.render_manager.text_objects_hud["text_bread_shadow"], 0.25, {x=85.5})
-
         self.engine:set_text_hud("text_bread", tostring(self.player.bread))
         self.engine.render_manager.text_objects_hud["text_bread"].x = 86.5
         self.engine.flux.to(self.engine.render_manager.text_objects_hud["text_bread"], 0.25, {x=84.5})
+    end
+end
+
+
+function GameScene:use_toaster(input)
+    -- If input == INTERACT and no toast has been toasted, try to add a slice. Otherwise, remove toast
+    if input == "INTERACT" then
+        
+        -- If toast has been toasted, remove slice of toast. Otherwise, attempt to add bread
+        if self.toaster.toasted then
+        else
+            if self.player.bread > 0 and self.toaster.bread < self.toaster.slots then
+                self.player:add_bread_to_toaster()
+                self.engine:add_sprite("toaster_bread_outline", "bread", "outline", TOASTER_X, TOASTER_Y - self.toaster.bread_y, 1, 0, 21)
+                self.engine:set_text_hud("text_bread", tostring(self.player.bread))
+                self.toaster:add_bread()
+            end
+        end
+    
+    -- If input == "PRESS_DOWN" and bread in toaster, activate toaster
+    elseif input == "PRESS_DOWN" then
+        if not self.toaster.toasted and self.toaster.bread > 0 then
+            self.toaster:toast_bread()
+        end
     end
 end
 
@@ -233,15 +254,26 @@ function GameScene:setup_events()
     self.engine.event_manager:on(self.engine.event_manager.events["PRESS_DOWN"], self, function()
         if self.fridge.open then
             self.fridge:select_nearest(0, 1)
+        else
+            if self.toaster.hovered then
+                self:use_toaster("PRESS_DOWN")
+            end
         end
     end)
 
     self.engine.event_manager:on(self.engine.event_manager.events["INTERACT"], self, function()
-        if self.player_indoors and self.fridge.hovered and not self.fridge.open then
-            self:open_fridge()
-        end
-        if self.board.hovered then
-            self:use_board()
+        if self.player_indoors then
+            if self.fridge.hovered and not self.fridge.open then
+                self:open_fridge()
+            end
+
+            if self.board.hovered and not self.fridge.open then
+                self:use_board()
+            end
+        
+            if self.toaster.hovered and not self.fridge.open then
+                self:use_toaster("INTERACT")
+            end
         end
     end)
 
@@ -304,16 +336,13 @@ function GameScene:update(dt, mx, my, md, mp)
     if self.fridge.selected_item then
         local values = self.fridge.inventory[self.fridge.selected_item]
         if values then
-            local item_name = values.name
-            self.engine:add_sprite_hud("fridge_selection_outline", item_name, "1_outline", self.fridge_x + values.x_offset, values.y, 1, 0, 255)
-            self.engine:add_sprite_hud("bubble", "bubble", "bubble", self.fridge_x + values.x_offset - 0.5, values.y - 11.5, 1, 0, 265)
-            self.engine:add_text_hud("bubble_text", item_name, "SuperCartoon", 5, Colours.BLACK,  self.fridge_x + values.x_offset - 0.5, values.y - 8.5, 1, 0, 300, "centre")
-
-            -- self.engine.flux.to(self.engine.render_manager.draw_objects_hud["bubble"], 0.25, {y=values.y -11.5}):ease("expoout")
+            self.engine:add_sprite_hud("fridge_selection_outline", values.name, "1_outline", self.fridge_x + values.x_offset, values.y, 1, 0, 255)
+            self.engine:add_sprite_hud("bubble", "bubble", "text_" .. values.text_length, self.fridge_x + values.x_offset - 0.5, values.y - 11.5, 1, 0, 265)
+            self.engine:add_text_hud("bubble_text", values.alias, "Curtel", 12, Colours.BLACK,  self.fridge_x + values.x_offset, values.y - 12.75, 1, 0, 300, "centre")
         end
     end
 
-    -- Update fridge parameters
+    -- Update fridge hovering
     self.fridge.hovered = self:hover_entity(self.player.interact_x, FRIDGE_X, FRIDGE_TOLERANCE)
     if self.fridge.hovered and not self.fridge.open and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["fridge_outline"] then
         self.engine:add_sprite("fridge_outline", "fridge", "outline", FRIDGE_X, 99.5, 1, 0, 21)
@@ -321,7 +350,7 @@ function GameScene:update(dt, mx, my, md, mp)
         self.engine.render_manager.draw_objects_foreground["fridge_outline"] = nil
     end
 
-    -- Update door parameters
+    -- Update door hovering
     self.door_hovered = self:hover_entity(self.player.interact_x, DOOR_X, DOOR_TOLERANCE)
     if self.door_hovered and not self.player_indoors and not self.engine.render_manager.draw_objects_foreground["door_outline"] then
         self.engine:add_sprite("door_outline", "door_outline", "door_outline", DOOR_X, 99, 1, 0, 41)
@@ -329,7 +358,7 @@ function GameScene:update(dt, mx, my, md, mp)
         self.engine.render_manager.draw_objects_foreground["door_outline"] = nil
     end
 
-    -- Update oven parameters
+    -- Update oven hovering
     self.oven.hovered = self:hover_entity(self.player.interact_x, OVEN_X, OVEN_TOLERANCE)
     if self.oven.hovered and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["oven_outline"] then
         self.engine:add_sprite("oven_outline", "oven", "outline", OVEN_X, 104.5, 1, 0, 21)
@@ -337,7 +366,7 @@ function GameScene:update(dt, mx, my, md, mp)
         self.engine.render_manager.draw_objects_foreground["oven_outline"] = nil
     end
 
-    -- Update board parameters
+    -- Update board hovering
     self.board.hovered = self:hover_entity(self.player.interact_x, BOARD_X, BOARD_TOLERANCE)
     if self.board.hovered and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["board_outline"] then
         self.engine:add_sprite("board_outline", "board", "outline", BOARD_X, 101.5, 1, 0, 21)
@@ -345,12 +374,19 @@ function GameScene:update(dt, mx, my, md, mp)
         self.engine.render_manager.draw_objects_foreground["board_outline"] = nil
     end
 
-    -- Update toaster parameters
+    -- Update toaster hovering
     self.toaster.hovered = self:hover_entity(self.player.interact_x, TOASTER_X, TOASTER_TOLERANCE)
     if self.toaster.hovered and self.player_indoors and not self.engine.render_manager.draw_objects_foreground["toaster_outline"] then
         self.engine:add_sprite("toaster_outline", "toaster", "outline", TOASTER_X, 99.5, 1, 0, 21)
+        if self.toaster.bread > 0 then
+            self.engine:add_sprite("toaster_bread_outline", "bread", "outline", TOASTER_X, TOASTER_Y - self.toaster.bread_y, 1, 0, 21)
+        end
     elseif not self.toaster.hovered then
         self.engine.render_manager.draw_objects_foreground["toaster_outline"] = nil
+        self.engine.render_manager.draw_objects_foreground["toaster_bread_outline"] = nil
+    end
+    if self.engine.render_manager.draw_objects_foreground["toaster_bread_outline"] then
+        self.engine.render_manager.draw_objects_foreground["toaster_bread_outline"].y = TOASTER_Y + self.toaster.bread_y
     end
 
     -- Set what player is carrying

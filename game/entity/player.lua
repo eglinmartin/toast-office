@@ -114,6 +114,13 @@ function Player:chop(board_x)
 end
 
 
+function Player:add_bread_to_toaster()
+    if self.bread > 0 then
+        self.bread = self.bread - 1
+    end
+end
+
+
 function Player:update(dt, mx, my, mouse_down, mouse_pressed)
     Entity.update(self, dt, mx, my, mouse_down, mouse_pressed)
 
