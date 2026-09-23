@@ -1,0 +1,45 @@
+{ "frames": {
+   "bread 0.aseprite": {
+    "frame": { "x": 0, "y": 0, "w": 13, "h": 11 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 13, "h": 11 },
+    "sourceSize": { "w": 13, "h": 11 },
+    "duration": 100
+   },
+   "bread 1.aseprite": {
+    "frame": { "x": 13, "y": 0, "w": 13, "h": 11 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 13, "h": 11 },
+    "sourceSize": { "w": 13, "h": 11 },
+    "duration": 100
+   },
+   "bread 2.aseprite": {
+    "frame": { "x": 26, "y": 0, "w": 13, "h": 11 },
+    "rotated": false,
+    "trimmed": false,
+    "spriteSourceSize": { "x": 0, "y": 0, "w": 13, "h": 11 },
+    "sourceSize": { "w": 13, "h": 11 },
+    "duration": 100
+   }
+ },
+ "meta": {
+  "app": "https://www.aseprite.org/",
+  "version": "1.3.7-x64",
+  "image": "bread.png",
+  "format": "RGBA8888",
+  "size": { "w": 39, "h": 11 },
+  "scale": "1",
+  "frameTags": [
+   { "name": "untoasted", "from": 0, "to": 0, "direction": "forward", "color": "#000000ff" },
+   { "name": "toaster", "from": 1, "to": 1, "direction": "forward", "color": "#000000ff" },
+   { "name": "outline", "from": 2, "to": 2, "direction": "forward", "color": "#000000ff" }
+  ],
+  "layers": [
+   { "name": "Layer 1", "opacity": 255, "blendMode": "normal" }
+  ],
+  "slices": [
+  ]
+ }
+}

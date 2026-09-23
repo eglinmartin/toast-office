@@ -9,6 +9,7 @@ local Colours = require("game.constants.colours")
 local Fridge = require("game.entity.fridge")
 local Oven = require("game.entity.oven")
 local Player = require("game.entity.player")
+local Toast = require("game.entity.toast")
 local Toaster = require("game.entity.toaster")
 
 -- Create scene
@@ -174,22 +175,55 @@ end
 
 
 function GameScene:use_board()
-    -- If nothing on the board, add a loaf with hp 4
-    if not self.board.loaf and self.board.slices == 0 then
-        self.board:add_loaf(NUM_SLICES_IN_LOAF)
+    -- Check if anything is on the board
+    if self.board:check_empty() then
 
-    -- If a loaf already on the board, chop it, and add a slice
-    elseif self.board.loaf then
-        self.player:chop(BOARD_X)
-        self.board:chop_slice()
+        -- Check if the player is carrying anything
+        if self.player.carrying then
+
+            -- If player is carrying toast and the board is empty, add toast
+            if self.player.carrying.id == "toast" then
+                self.board:add_toast(self.player.carrying)
+                self.player:drop_item()
+            end
+                
+        -- If player is not carrying anything and has no bread left, add a loaf
+        elseif not self.player.carrying and self.player.bread == 0 then
+            self.board:add_loaf(NUM_SLICES_IN_LOAF)
+        end
+
+    -- Check if the board is empty
+    elseif not self.board:check_empty() then
+
+        -- Check if the player is carrying anything
+        if self.player.carrying then
+
+            if self.player.carrying.id == "toast" then
+                --Conflict to sort
+            end
     
-    elseif not self.board.loaf then
-        self.player.bread = self.board.slices
-        self.board:remove_slices()
+        -- If player's hands are free:
+        else
+            
+            -- If there is a loaf on the board:
+            if self.board.loaf then
+                self.player:chop(BOARD_X)
+                self.board:chop_slice()
 
-        self.engine:set_text_hud("text_bread", tostring(self.player.bread))
-        self.engine.render_manager.text_objects_hud["text_bread"].x = 86.5
-        self.engine.flux.to(self.engine.render_manager.text_objects_hud["text_bread"], 0.25, {x=84.5})
+            elseif self.board.slices > 0 then
+                self.player.bread = self.board.slices
+                self.board:remove_slices()
+
+                self.engine:set_text_hud("text_bread", tostring(self.player.bread))
+                self.engine.render_manager.text_objects_hud["text_bread"].x = 86.5
+                self.engine.flux.to(self.engine.render_manager.text_objects_hud["text_bread"], 0.25, {x=84.5})
+
+            -- If there is toast on the board
+            elseif self.board.toast then
+                self.player:pick_up_item(self.board.toast)
+                self.board:remove_toast()
+            end
+        end
     end
 end
 
@@ -200,6 +234,10 @@ function GameScene:use_toaster(input)
         
         -- If toast has been toasted, remove slice of toast. Otherwise, attempt to add bread
         if self.toaster.toasted then
+            if not self.player.carring then
+                self.toaster:remove_bread()
+                self.player:pick_up_item(Toast(self))
+            end
         else
             if self.player.bread > 0 and self.toaster.bread < self.toaster.slots then
                 self.player:add_bread_to_toaster()
@@ -207,6 +245,7 @@ function GameScene:use_toaster(input)
                 self.engine:set_text_hud("text_bread", tostring(self.player.bread))
                 self.toaster:add_bread()
             end
+            
         end
     
     -- If input == "PRESS_DOWN" and bread in toaster, activate toaster
@@ -233,13 +272,13 @@ function GameScene:setup_events()
 
     self.engine.event_manager:on(self.engine.event_manager.events["HOLD_LEFT"], self, function()
         if not self.fridge.open and not self.player.chopping then
-            self.player:move_left()
+            self.player:move(-1)
         end
     end)
 
     self.engine.event_manager:on(self.engine.event_manager.events["HOLD_RIGHT"], self, function()
         if not self.fridge.open and not self.player.chopping then
-            self.player:move_right()
+            self.player:move(1)
         end
     end)
 
@@ -265,13 +304,9 @@ function GameScene:setup_events()
         if self.player_indoors then
             if self.fridge.hovered and not self.fridge.open then
                 self:open_fridge()
-            end
-
-            if self.board.hovered and not self.fridge.open then
+            elseif self.board.hovered and not self.fridge.open then
                 self:use_board()
-            end
-        
-            if self.toaster.hovered and not self.fridge.open then
+            elseif self.toaster.hovered and not self.fridge.open then
                 self:use_toaster("INTERACT")
             end
         end
@@ -387,17 +422,6 @@ function GameScene:update(dt, mx, my, md, mp)
     end
     if self.engine.render_manager.draw_objects_foreground["toaster_bread_outline"] then
         self.engine.render_manager.draw_objects_foreground["toaster_bread_outline"].y = TOASTER_Y + self.toaster.bread_y
-    end
-
-    -- Set what player is carrying
-    if self.board.hovered and self.player_indoors then
-        if self.player.carrying ~= "knife" then
-            self.player:update_carrying("knife")
-        end
-    else
-        if self.player.carrying ~= "empty" then
-            self.player:update_carrying("empty")
-        end
     end
 end
 

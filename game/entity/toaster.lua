@@ -4,31 +4,23 @@ local Toaster = Class{__includes = Entity}
 
 
 function Toaster:init(scene, x, y, flux)
-    Entity.init(self, scene, "toaster", {
-        x=x,
-        y=y,
-        w=15,
-        h=19,
-        s=1,
-        r=0,
-        sprite_sheet="toaster",
-        sprite_tag="done",
-        animation_speed=1,
-        depth=23
-    })
+    Entity.init(self, scene, "toaster", {x=x, y=y, w=15, h=19, s=1, r=0, sprite_sheet="toaster", sprite_tag="done", animation_speed=1, depth=23})
     scene.engine:register_entity("toaster", self)
-    self.hovered = false
     self.flux = flux
     self.engine = scene.engine
 
+
+    self.hovered = false
+
     self.bread = 0
     self.bread_y = 0
-
     self.slots = 1
 
     self.toasting = false
-    self.toast_time = 5
+    self.toast_time = 1
     self.toast_progress = 0
+    self.toasted = false
+
     self.engine:add_sprite("toaster_dial", "toaster_dial", "toaster_dial", self.x - 3, self.y + self.bread_y, 1, 0, 24)
 end
 
@@ -38,6 +30,18 @@ function Toaster:add_bread()
     self.bread_y = -1
     self.flux.to(self, 0.25, {bread_y=0}):ease("expoout")
     self.engine:add_sprite("toaster_bread", "bread", "untoasted", self.x, self.y + self.bread_y, 1, 0, 22)
+end
+
+
+function Toaster:remove_bread()
+    if self.bread > 0 then
+        self.bread = self.bread - 1
+        if self.bread == 0 then
+            self.toasted = false
+        end
+        self.engine.render_manager.draw_objects_foreground["toaster_bread"] = nil
+        self.engine.render_manager.draw_objects_foreground["toaster_bread_outline"] = nil
+    end
 end
 
 
@@ -63,6 +67,7 @@ end
 
 function Toaster:pop_up()
     self.toasting = false
+    self.toasted = true
     self.toast_timer = nil
     self.sprite_tag = "done"
     self:create_sprite()

@@ -2,12 +2,13 @@
 local Class = require("hatchling.engine.lib.class")
 local Entity = require("hatchling.engine.class.entity")
 local Fridge = Class{__includes = Entity}
+local Items = require("game.constants.items")
 
 
-Fridge.Item = {
-    JAM_STRAWBERRY = {name="strawberry_jam", alias="Strawberry Jam", unlocked=true, x_offset=-14, y=42.5, amount=100, text_length="huge"},
-    MARMALADE = {name="marmalade", alias="Marmalade", unlocked=true, x_offset=-3, y=42.5, amount=100, text_length="medium"},
-    BUTTER = {name="butter", alias="Butter", unlocked=true, x_offset=14, y=62.5, amount=100, text_length="small"},
+Fridge.Stock = {
+    JAM_STRAWBERRY = {name=Items.JAM_STRAWBERRY.name, alias=Items.JAM_STRAWBERRY.alias, unlocked=true, x_offset=-14, y=42.5, amount=100, text_length="huge"},
+    MARMALADE = {name=Items.MARMALADE.name, alias=Items.MARMALADE.alias, unlocked=true, x_offset=-3, y=42.5, amount=100, text_length="medium"},
+    BUTTER = {name=Items.BUTTER.name, alias=Items.BUTTER.alias, unlocked=true, x_offset=14, y=62.5, amount=100, text_length="small"},
 }
 
 
@@ -29,7 +30,7 @@ function Fridge:init(scene, x, y)
     self.open = false
 
     self.inventory = {}
-    for key, values in pairs(Fridge.Item) do
+    for key, values in pairs(Fridge.Stock) do
         self.inventory[key] = {
             name = values.name,
             alias = values.alias,
