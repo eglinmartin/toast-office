@@ -30,7 +30,7 @@ function Player:init(scene, x, y)
     scene.engine:register_entity("hand_back", self.hand_back)
     self.hand_back:rescale(-1, 1)
     self.hand_back:create_sprite()
-    self.dominant_hand = self.hand_front
+    self.dominant_hand = self.hand_back
     
     -- Set up walking
     self.walking = false
@@ -97,9 +97,11 @@ function Player:update(dt, mx, my, mouse_down, mouse_pressed)
     end
 
     -- Set dominant hand
-    self.dominant_hand = self.hand_front
+    self.dominant_hand = self.hand_back
+    self.other_hand = self.hand_front
     if self.facing == 1 then
-        self.dominant_hand = self.hand_back
+        self.dominant_hand = self.hand_front
+        self.other_hand = self.hand_back
     end
 
     -- Move player
@@ -121,13 +123,43 @@ function Player:update(dt, mx, my, mouse_down, mouse_pressed)
         self.interact_x = self.x + INTERACT_OFFSET
     end
 
-    if not self.chopping then
+
+    if not self.chopping  and not self.carrying then
         self.hand_front.x = self.x - (2 * self.facing)
         self.hand_back.x = self.x + (2 * self.facing)
         self.hand_front.y = self.y + 0.5
         self.hand_back.y = self.y + 0.5
         self.hand_front.rotation = -self.rotation * 5
         self.hand_back.rotation = self.rotation * 5
+        if self.engine.render_manager.draw_objects_foreground['player_carrying'] then
+            self.engine.render_manager.draw_objects_foreground['player_carrying'] = nil
+        end
+        self.dominant_hand.depth = self.depth + self.facing
+        self.other_hand.depth = self.depth - self.facing
+
+    elseif self.carrying then
+        local carry_depth = 130
+        local carry_x = self.x - 1.5
+        local dominant_hand_carry_x = self.x - 4
+        local other_hand_carry_x = self.x + 1
+        if self.facing == 1 then
+            carry_x = self.x + 1.5
+            dominant_hand_carry_x = self.x + 4
+            other_hand_carry_x = self.x - 1
+        end
+        if self.carrying.id == "toast" then
+            self.engine:add_sprite('player_carrying', 'bread_stack', '1', carry_x, self.y-2, 1, 0, carry_depth)
+            
+            self.dominant_hand.x = dominant_hand_carry_x
+            self.dominant_hand.y = self.y + 0.5
+            self.dominant_hand.rotation = 0
+            self.dominant_hand.depth = carry_depth - 1
+
+            self.other_hand.x = other_hand_carry_x
+            self.other_hand.y = self.y + 0.5
+            self.other_hand.rotation = 0
+            self.other_hand.depth = carry_depth - 1
+        end
     end
 end
 
